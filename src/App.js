@@ -8,11 +8,11 @@ class App extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.hitEnter = this.hitEnter.bind(this);
     this.closeThisB = this.closeThisB.bind(this);
+    this.completeThis = this.completeThis.bind(this);
     this.state = {
       newTask: "",
       removeTask: {},
       currentView: 0,
-      done: false,
       taskArray: [],
       taskNumber: 1,
       removedTasks: [],
@@ -40,20 +40,25 @@ class App extends React.Component {
     }
   }
 
+  completeThis(index) {
+    let newEntry = this.state.taskArray[index];
+    newEntry.done = newEntry.done ? false : true;
+    console.log(this.state.taskArray[index].done)
+    this.setState(this.state)
+
+  }
+
   closeThisB(index) {
     const entry = this.state.taskArray[index];
-    const remove = this.state.taskArray.filter(task => task !== entry);
+    const remove = this.state.taskArray.filter((task) => task !== entry);
     const newRemovedArray = this.state.removedTasks.concat({
-      entry
+      entry,
     });
-    //console.log(entry);
-    //console.log(remove);
+    
     this.setState({
       taskArray: remove,
       removedTasks: newRemovedArray,
     });
-    console.log(this.state.removedTasks);
-    
   }
 
   render() {
@@ -84,8 +89,10 @@ class App extends React.Component {
                 text={value.name}
                 key={index}
                 keyID={index}
+                completeThis={this.completeThis}
                 taskNumber={value.taskNumber}
                 closeThisB={this.closeThisB}
+                done={value.done}
               />
             );
           })}
