@@ -14,7 +14,7 @@ class App extends React.Component {
       taskArray: [],
       taskNumber: 1,
       removedTasks: [],
-      taskStatus: "All",
+      view: "All",
     };
   }
 
@@ -79,19 +79,50 @@ class App extends React.Component {
     });
     this.setState({ taskArray: newArray });
   }
-  // closeThisB(id) {
-  //   let newArr = this.state.taskArray.filter((task) => task.taskNumber !== id);
-  //   this.setState({ taskArray: newArr });
-  // }
+
+  completeAll(param) {
+    let newArray = this.state.taskArray.map((taskObj) => { 
+      if (param === 'deleted' && taskObj.done) {
+        taskObj[param] = true;
+      } else if (param === 'done' && !taskObj.done) { 
+        taskObj[param] = true;
+      } else if (param === 'active' && taskObj.done) { 
+        taskObj.done = false;
+      }
+      return taskObj
+  });
+  this.setState({ taskArray: newArray })
+}
 
   render() {
-    let renderArray = this.state.taskArray.filter((el) => el.deleted === false);
-
-    if (this.state.taskStatus === "Active") {
-      renderArray = renderArray.filter((el) => el.done === false);
-    } else if (this.state.taskStatus === "Complete") {
-      renderArray = renderArray.filter((el) => el.done === true);
-    }
+    const filterHelper = (item) => {
+      if (!item.deleted) {
+        if (this.state.view === "Active" && !item.done) {
+          return item;
+        } else if (this.state.view === "Complete" && item.done) {
+          return item;
+          } else if (this.state.view === "All"){
+            return item;
+        }
+      }
+    };
+    const mapHelper = (value, index) => {
+      return (
+        <Task
+          text={value.name}
+          key={index}
+          keyID={index}
+          completeThis={this.completeThis}
+          taskNumber={value.taskNumber}
+          closeThisB={this.closeThisB}
+          done={value.done}
+          deleted={value.deleted}
+        />
+      );
+    };
+    const renderArray = this.state.taskArray
+      .filter(filterHelper)
+      .map(mapHelper);
 
     return (
       <div className="App text-center container-fluid col-8 mt-5">
@@ -106,51 +137,39 @@ class App extends React.Component {
             onKeyPress={this.hitEnter}
           />
         </div>
-        <ul className="list-group">
-          {renderArray.map((value, index) => {
-            return (
-              <Task
-                text={value.name}
-                key={index}
-                keyID={index}
-                completeThis={this.completeThis}
-                taskNumber={value.taskNumber}
-                closeThisB={this.closeThisB}
-                done={value.done}
-                deleted={value.deleted}
-              />
-            );
-          })}
-        </ul>
+        <ul className="list-group">{renderArray}</ul>
         <div className="row text-center justify-content-evenly">
           <div className="col-sm-2">
             <div className="btn btn-sm">{renderArray.length} Tasks</div>
           </div>
           <button
             className="col-sm-2 btn btn-sm btn-outline-dark"
-            onClick={() => this.setState({ taskStatus: "All" })}
+            onClick={() => this.setState({ view: "All" })}
           >
             All
           </button>
           <button
             className="col-sm-2 btn btn-sm btn-outline-dark"
-            onClick={() => this.setState({ taskStatus: "Active" })}
+            onClick={() => this.setState({ view: "Active" })}
           >
             Active
           </button>
           <button
-            className="col-sm-2 btn btn-sm btn-outline-dark"
-            onClick={() => this.setState({ taskStatus: "Complete" })}
+            className="col-sm-2 btn btn-sm btn-outline-success"
+            onClick={() => this.setState({ view: "Complete" })}
           >
             Complete
           </button>
         </div>
         <div className="mt-5 row d-flex text-center justify-content-evenly">
-          <button className="col-sm-2 btn btn-sm btn-outline-dark">
+          <button className="col-sm-2 col-md-3 btn rounded-pill btn-sm btn-rounded btn-outline-success" onClick={() => this.completeAll('done')}>
+            Mark All Completed
+          </button>
+          <button className="col-sm-2 col-md-3 btn rounded-pill btn-sm btn-rounded btn-outline-danger" onClick={() => this.completeAll('deleted')}>
             Delete All Completed
           </button>
-          <button className="col-sm-2 btn btn-sm btn-outline-dark">
-            Mark Complete Active
+          <button className="col-sm-2 col-md-3 btn rounded-pill btn-sm btn-rounded btn-outline-warning" onClick={() => this.completeAll('active')}>
+            Mark All Active
           </button>
         </div>
       </div>
